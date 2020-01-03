@@ -1,0 +1,13 @@
+*/__pycache__
+/.idea/
+logs/*
+res/*
+data/*
+cache/*
+checkpoint/*
+!logs/.git
+!res/.git
+!data/.git
+!cache/.git
+!checkpoint/.git
+

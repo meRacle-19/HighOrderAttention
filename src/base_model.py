@@ -63,7 +63,7 @@ class BaseModel(object):
 
     def _l1_loss(self, hparams):
         l1_loss = tf.zeros([1], dtype=tf.float32)
-        # embedding_layer l2 loss
+        # embedding_layer l1 loss
         for param in self.embed_params:
             l1_loss = tf.add(l1_loss, tf.multiply(hparams.embed_l1, tf.norm(param, ord=1)))
         params = self.layer_params

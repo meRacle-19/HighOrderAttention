@@ -152,10 +152,11 @@ def check_nn_config(config):
 def check_config(config):
     """check networks config"""
     if config['model']['model_type'] not in ['deepFM', 'deepWide', 'dnn', 'ipnn', \
-                                             'opnn', 'fm', 'lr', 'din', 'cccfnet', 'deepcross', 'exDeepFM', "cross", "CIN"]:
+                                             'opnn', 'fm', 'lr', 'din', 'cccfnet', \
+                                             'deepcross', 'exDeepFM', "cross", "CIN"]:
         raise ValueError(
-            "model type must be cccfnet, deepFM, deepWide, dnn, ipnn, opnn, fm, lr, din, deepcross, exDeepFM, cross, CIN but you set is {0}".format(
-                config['model']['model_type']))
+            "model type must be cccfnet, deepFM, deepWide, dnn, ipnn, opnn, fm, lr, \
+             din, deepcross, exDeepFM, cross, CIN but you set is {0}".format(config['model']['model_type']))
     check_nn_config(config)
 
 

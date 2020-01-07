@@ -51,6 +51,12 @@ def create_hparams(FLAGS):
         method=FLAGS['method'] if 'method' in FLAGS else None,
         load_model_name=FLAGS['load_model_name'] if 'load_model_name' in FLAGS else None,
         mu=FLAGS['mu'] if 'mu' in FLAGS else None,
+        embedding_dim=FLAGS['embedding_dim'] if 'embedding_dim' in FLAGS else None,
+        orders=FLAGS['orders'] if 'orders' in FLAGS else None,
+        attention_embedding_dims=FLAGS['attention_embedding_dims'] if 'attention_embedding_dims' in FLAGS else None,
+        attention_heads=FLAGS['attention_heads'] if 'attention_heads' in FLAGS else None,
+        layer_activations=FLAGS['layer_activations'] if 'layer_activations' in FLAGS else None,
+        layer_dropout=FLAGS['layer_dropout'] if 'layer_dropout' in FLAGS else None,
         # train
         init_method=FLAGS['init_method'] if 'init_method' in FLAGS else 'tnormal',
         init_value=FLAGS['init_value'] if 'init_value' in FLAGS else 0.01,
@@ -79,7 +85,7 @@ def check_type(config):
     # check parameter type
     int_parameters = ['FEATURE_COUNT', 'FIELD_COUNT', 'dim', 'epochs', 'batch_size', 'show_step', \
                       'save_epoch', 'PAIR_NUM', 'DNN_FIELD_NUM', 'attention_layer_sizes', \
-                      'n_user', 'n_item', 'n_user_attr', 'n_item_attr']
+                      'n_user', 'n_item', 'n_user_attr', 'n_item_attr', 'embedding_dim', 'orders']
     for param in int_parameters:
         if param in config and not isinstance(config[param], int):
             raise TypeError("parameters {0} must be int".format(param))
@@ -96,7 +102,8 @@ def check_type(config):
         if param in config and not isinstance(config[param], str):
             raise TypeError("parameters {0} must be str".format(param))
 
-    list_parameters = ['layer_sizes', 'activation', 'dropout']
+    list_parameters = ['layer_sizes', 'activation', 'dropout', 'attention_embedding_dims', \
+                       'attention_heads', 'layer_activations', 'layer_dropout']
     for param in list_parameters:
         if param in config and not isinstance(config[param], list):
             raise TypeError("parameters {0} must be list".format(param))
@@ -127,6 +134,10 @@ def check_nn_config(config):
         required_parameters = ['train_file', 'eval_file', 'FIELD_COUNT', 'FEATURE_COUNT', 'method',
                                'dim', 'layer_sizes', 'cross_layers', 'activation', 'loss', 'data_format',
                                'dropout']
+    elif config['model']['model_type'] in ['HOA']:
+        required_parameters = ['train_file', 'eval_file', 'FIELD_COUNT', 'FEATURE_COUNT', 'method', 'embedding_dim',
+                               'orders', 'attention_embedding_dims', 'attention_heads', 'layer_sizes',
+                               'layer_activations', 'layer_dropout']
     else:
         required_parameters = ['train_file', 'eval_file', 'FIELD_COUNT', 'FEATURE_COUNT', 'method',
                                'dim', 'layer_sizes', 'activation', 'loss', 'data_format', 'dropout']
@@ -153,7 +164,8 @@ def check_config(config):
     """check networks config"""
     if config['model']['model_type'] not in ['deepFM', 'deepWide', 'dnn', 'ipnn', \
                                              'opnn', 'fm', 'lr', 'din', 'cccfnet', \
-                                             'deepcross', 'exDeepFM', "cross", "CIN"]:
+                                             'deepcross', 'exDeepFM', "cross", "CIN", \
+                                             'HOA']:
         raise ValueError(
             "model type must be cccfnet, deepFM, deepWide, dnn, ipnn, opnn, fm, lr, \
              din, deepcross, exDeepFM, cross, CIN but you set is {0}".format(config['model']['model_type']))

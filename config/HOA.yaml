@@ -1,0 +1,48 @@
+#data
+#data format:ffm
+data:
+     train_file  :  data/train.ffm  
+     eval_file  :  data/eval.ffm  
+     # test_file  : data/test.ffm  
+     # infer_file  :  data/test.ffm  
+     FIELD_COUNT :  39
+     FEATURE_COUNT : 28651
+     data_format : ffm
+
+#model
+#model_type:deepFM or deepWide or dnn or ipnn or opnn or fm or lr
+model:
+    method : classification
+    model_type : HOA
+    embedding_dim : 16
+    orders : 3
+    attention_embedding_dims : [16, 8, 8, 4]
+    attention_heads : [2, 2, 2, 1]
+    layer_sizes : [128, 128, 64, 32]
+    layer_activations : [relu, relu, relu, relu]
+    layer_dropout : [0.0, 0.0, 0.0, 0.0]
+#    load_model_name : ./checkpoint/epoch_1
+
+
+#train
+#init_method: normal,tnormal,uniform,he_normal,he_uniform,xavier_normal,xavier_uniform
+train:
+    init_method: tnormal
+    init_value : 0.1
+    embed_l2 : 0.001
+    embed_l1 : 0.000
+    layer_l2 : 0.001
+    layer_l1 : 0.000
+    learning_rate : 0.001
+    loss : log_loss
+    optimizer : adam
+    epochs : 10
+    batch_size : 256
+
+#show info
+#metric :'auc','logloss', 'group_auc'
+info:
+    show_step : 50
+    save_epoch : 2
+    metrics : ['auc','logloss']
+

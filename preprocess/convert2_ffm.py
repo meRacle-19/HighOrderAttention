@@ -28,7 +28,7 @@ input_path = "./data/criteo.csv"
 train_file = "./cache/train.csv"
 eval_file = "./cache/eval.csv"
 test_file = "./cache/test.csv"
-fieldList = ['label','I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 'I11', 'I12', 'I13', 'C1', 'C2', 'C3',
+fieldList = ['Label','I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 'I11', 'I12', 'I13', 'C1', 'C2', 'C3',
              'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12', 'C13', 'C14', 'C15', 'C16', 'C17', 'C18',
              'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26']
 sample(input_path, train_file, eval_file, test_file, debug=1000, col_index=fieldList)
@@ -141,21 +141,21 @@ def convert_to_ffm(src_path, dst_path, fieldIndex, featIndex):
 
 
 if __name__ == '__main__':
-    input_path = "./data/criteo.csv"
-    train_file = "./cache/train.csv"
-    eval_file = "./cache/eval.csv"
-    test_file = "./cache/test.csv"
+    input_path = "../data/criteo.csv"
+    train_file = "../cache/train.csv"
+    eval_file = "../cache/eval.csv"
+    test_file = "../cache/test.csv"
     fieldList = ['Label', 'I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 'I11', 'I12', 'I13', 'C1', 'C2', 'C3',
                  'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12', 'C13', 'C14', 'C15', 'C16', 'C17', 'C18',
                  'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26']
-    sample(input_path, train_file, eval_file, test_file, debug=100000, col_index=fieldList)
+    sample(input_path, train_file, eval_file, test_file, col_index=fieldList)
     
     # 统计category feat词频
     feat_cnt = defaultdict(lambda: 0)
     scan(train_file, feat_cnt)
     scan(eval_file, feat_cnt)
     scan(test_file, feat_cnt)
-    T = 4 # category feat长尾阈值
+    T = 5 # category feat长尾阈值
     featSet = set()
     # continuous feat离散化  category feat去长尾
     get_feat(featSet, train_file, T)
@@ -176,7 +176,7 @@ if __name__ == '__main__':
         fieldIndex[field] = index
     print('field dict num:', len(fieldIndex))
     
-    convert_to_ffm(train_file, "./data/train.ffm", fieldIndex, featIndex)
-    convert_to_ffm(eval_file, "./data/eval.ffm", fieldIndex, featIndex)
-    convert_to_ffm(test_file, "./data/test.ffm", fieldIndex, featIndex)
+    convert_to_ffm(train_file, "../data/train.ffm", fieldIndex, featIndex)
+    convert_to_ffm(eval_file, "../data/eval.ffm", fieldIndex, featIndex)
+    convert_to_ffm(test_file, "../data/test.ffm", fieldIndex, featIndex)
 

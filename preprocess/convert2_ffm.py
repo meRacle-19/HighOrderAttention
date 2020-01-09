@@ -17,11 +17,12 @@ def sample(input_path, train_path, eval_path, test_path, gen_file=True, ratio=0.
     source = pd.read_csv(input_path, nrows=debug, header=None, names=cols, sep='\t')
     source = source.sample(frac=1.0)  # 全部打乱
     cut_idx1 = int(round(0.1 * source.shape[0]))
-    cut_idx2 = int(round(0.3 * source.shape[0]))
+    cut_idx1 = 0
+    cut_idx2 = int(round(0.2 * source.shape[0]))
 
     df_test, df_eval, df_train = source.iloc[:cut_idx1], source.iloc[cut_idx1:cut_idx2], source.iloc[cut_idx2:]
     if gen_file:
-        df_test.to_csv(test_path, index=None, sep=',')
+        #df_test.to_csv(test_path, index=None, sep=',')
         df_eval.to_csv(eval_path, index=None, sep=',')
         df_train.to_csv(train_path, index=None, sep=',')
     del df_train, df_eval, df_test
@@ -149,19 +150,19 @@ if __name__ == '__main__':
                  'C2', 'C3',
                  'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12', 'C13', 'C14', 'C15', 'C16', 'C17', 'C18',
                  'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26']
-    sample(input_path, train_file, eval_file, test_file, cols=fieldList)
+    sample(input_path, train_file, eval_file, test_file, cols=fieldList, debug=10000000)
 
     # 统计category feat词频
     feat_cnt = defaultdict(lambda: 0)
     scan(train_file, feat_cnt)
     scan(eval_file, feat_cnt)
-    scan(test_file, feat_cnt)
+    #scan(test_file, feat_cnt)
     T = 5 # category feat长尾阈值
     featSet = set()
     # continuous feat离散化  category feat去长尾
     get_feat(featSet, train_file, T)
-    get_feat(featSet, test_file, T)
     get_feat(featSet, eval_file, T)
+    #get_feat(featSet, test_file, T)
     print('train and test data total feat num:', len(featSet))
 
     # 特征值编号
@@ -177,11 +178,11 @@ if __name__ == '__main__':
         fieldIndex[field] = index
     print('field dict num:', len(fieldIndex))
     
-    with open(summr_file) as sm:
+    convert_to_ffm(train_file, "../data/sample_1000w/train.ffm", fieldIndex, featIndex)
+    convert_to_ffm(eval_file, "../data/sample_1000w/eval.ffm", fieldIndex, featIndex)
+    #convert_to_ffm(test_file, "../data/sample_1000w/test.ffm", fieldIndex, featIndex)
+    with open(summr_file, 'w') as sm:
         sm.write("num_feature_values : {} \n \
                   num_field_values: {}".format(len(featIndex),len(fieldIndex)))
-    convert_to_ffm(train_file, "../data/train.ffm", fieldIndex, featIndex)
-    convert_to_ffm(eval_file, "../data/eval.ffm", fieldIndex, featIndex)
-    convert_to_ffm(test_file, "../data/test.ffm", fieldIndex, featIndex)
 
 

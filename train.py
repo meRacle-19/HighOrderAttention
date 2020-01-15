@@ -148,10 +148,11 @@ def cache_data(hparams, filename, flag):
         print("data sample num:{0}".format(sample_num))
         with open(sample_num_path, 'w') as f:
             f.write(str(sample_num) + '\n')
+        """
         with open(impression_id_path, 'w') as f:
             for impression_id in impression_id_list:
                 f.write(str(impression_id) + '\n')
-
+        """
 
 def train(hparams, scope=None, target_session=""):
     params = hparams.values()

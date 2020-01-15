@@ -53,10 +53,13 @@ def create_hparams(FLAGS):
         mu=FLAGS['mu'] if 'mu' in FLAGS else None,
         embedding_dim=FLAGS['embedding_dim'] if 'embedding_dim' in FLAGS else None,
         orders=FLAGS['orders'] if 'orders' in FLAGS else None,
-        attention_embedding_dims=FLAGS['attention_embedding_dims'] if 'attention_embedding_dims' in FLAGS else None,
-        attention_heads=FLAGS['attention_heads'] if 'attention_heads' in FLAGS else None,
+        cross_layer_heads=FLAGS['cross_layer_heads'] if 'cross_layer_heads' in FLAGS else None,
+        cross_layer_dims=FLAGS['cross_layer_dims'] if 'cross_layer_dims' in FLAGS else None,
         layer_activations=FLAGS['layer_activations'] if 'layer_activations' in FLAGS else None,
         layer_dropout=FLAGS['layer_dropout'] if 'layer_dropout' in FLAGS else None,
+        reduce_layer_activations=FLAGS['reduce_layer_activations'] if 'reduce_layer_activations' in FLAGS else None,
+        reduce_layer_sizes=FLAGS['reduce_layer_sizes'] if 'reduce_layer_sizes' in FLAGS else None,
+
         # train
         init_method=FLAGS['init_method'] if 'init_method' in FLAGS else 'tnormal',
         init_value=FLAGS['init_value'] if 'init_value' in FLAGS else 0.01,
@@ -91,7 +94,7 @@ def check_type(config):
             raise TypeError("parameters {0} must be int".format(param))
 
     float_parameters = ['init_value', 'learning_rate', 'embed_l2', \
-                        'embed_l1', 'layer_l2', 'layer_l1', 'mu']
+                        'embed_l1', 'layer_l2', 'layer_l1', 'mu', 'layer_dropout']
     for param in float_parameters:
         if param in config and not isinstance(config[param], float):
             raise TypeError("parameters {0} must be float".format(param))
@@ -102,8 +105,10 @@ def check_type(config):
         if param in config and not isinstance(config[param], str):
             raise TypeError("parameters {0} must be str".format(param))
 
-    list_parameters = ['layer_sizes', 'activation', 'dropout', 'attention_embedding_dims', \
-                       'attention_heads', 'layer_activations', 'layer_dropout']
+    list_parameters = ['layer_sizes', 'activation', 'dropout',  \
+                       'layer_activations', "projection_layer_sizes", \
+                       "reduce_layer_sizes", "reduce_layer_activations",
+                       'cross_layer_heads', 'cross_layer_dims']
     for param in list_parameters:
         if param in config and not isinstance(config[param], list):
             raise TypeError("parameters {0} must be list".format(param))
@@ -136,7 +141,7 @@ def check_nn_config(config):
                                'dropout']
     elif config['model']['model_type'] in ['HOA']:
         required_parameters = ['train_file', 'eval_file', 'FIELD_COUNT', 'FEATURE_COUNT', 'method', 'embedding_dim',
-                               'orders', 'attention_embedding_dims', 'attention_heads', 'layer_sizes',
+                               'orders', 'cross_layer_heads', 'layer_sizes',
                                'layer_activations', 'layer_dropout']
     else:
         required_parameters = ['train_file', 'eval_file', 'FIELD_COUNT', 'FEATURE_COUNT', 'method',

@@ -1,12 +1,21 @@
 #data
 #data format:ffm
 data:
-     train_file  :  data/train.ffm  
-     eval_file  :  data/eval.ffm  
-     # test_file  : data/test.ffm  
-     # infer_file  :  data/test.ffm  
+     # test_file  : data/test.ffm
+     # infer_file  :  data/test.ffm
+#     train_file  :  data/sample/train.ffm
+#     eval_file  :  data/sample/eval.ffm
+#     FEATURE_COUNT : 28651
+#     train_file  :  data/sample_1000w/train.ffm
+#     eval_file  :  data/sample_1000w/eval.ffm
+#     FEATURE_COUNT : 522604
+     train_file  :  data/sample_2000w/train.ffm
+     eval_file  :  data/sample_2000w/eval.ffm
+     FEATURE_COUNT : 885789
+#     train_file  :  data/train.ffm
+#     eval_file  :  data/eval.ffm
+#     FEATURE_COUNT : 1738970
      FIELD_COUNT :  39
-     FEATURE_COUNT : 28651
      data_format : ffm
 
 #model
@@ -15,12 +24,18 @@ model:
     method : classification
     model_type : HOA
     embedding_dim : 16
-    orders : 3
-    attention_embedding_dims : [16, 8, 8, 4]
-    attention_heads : [2, 2, 2, 1]
-    layer_sizes : [128, 128, 64, 32]
-    layer_activations : [relu, relu, relu, relu]
-    layer_dropout : [0.0, 0.0, 0.0, 0.0]
+    orders : 2
+    layer_sizes : [256, 128, 64, 1]         # combined dnn
+    layer_activations : [relu, relu, relu]  # combined dnn
+    layer_dropout : 0.1
+
+    # len must equal to orders
+    cross_layer_heads : [2, 2]
+    cross_layer_dims : [8, 8]                # only work if projection=True
+
+    # only work if reduce=mlp_pooling
+    reduce_layer_sizes : [256, 256]
+    reduce_layer_activations : [0.3, 0.3]
 #    load_model_name : ./checkpoint/epoch_1
 
 
@@ -37,12 +52,12 @@ train:
     loss : log_loss
     optimizer : adam
     epochs : 10
-    batch_size : 256
+    batch_size : 2048
 
 #show info
 #metric :'auc','logloss', 'group_auc'
 info:
-    show_step : 50
+    show_step : 20
     save_epoch : 2
     metrics : ['auc','logloss']
 

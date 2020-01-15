@@ -155,8 +155,8 @@ class BaseModel(object):
         train_step = train_opt(hparams)
         return train_step
 
-    def _active_layer(self, logit, scope, activation, layer_idx):
-        logit = self._dropout(logit, layer_idx)
+    def _active_layer(self, logit, activation):
+        logit = self._dropout(logit)
         logit = self._activate(logit, activation)
         return logit
 
@@ -176,8 +176,8 @@ class BaseModel(object):
         else:
             raise ValueError("this activations not defined {0}".format(activation))
 
-    def _dropout(self, logit, layer_idx):
-        logit = tf.nn.dropout(x=logit, keep_prob=self.layer_keeps[layer_idx])
+    def _dropout(self, logit):
+        logit = tf.nn.dropout(x=logit, keep_prob=self.layer_keeps)
         return logit
 
     def train(self, sess):

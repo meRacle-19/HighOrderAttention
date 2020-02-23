@@ -6,12 +6,18 @@ data:
 #     train_file  :  data/sample/train.ffm
 #     eval_file  :  data/sample/eval.ffm
 #     FEATURE_COUNT : 28651
+#     train_file  :  data/sample_500w/train.ffm
+#     eval_file  :  data/sample_500w/eval.ffm
+#     FEATURE_COUNT : 315081
+     train_file  :  data/sample_50w/train.ffm
+     eval_file  :  data/sample_50w/eval.ffm
+     FEATURE_COUNT : 69818
 #     train_file  :  data/sample_1000w/train.ffm
 #     eval_file  :  data/sample_1000w/eval.ffm
 #     FEATURE_COUNT : 522604
-     train_file  :  data/sample_2000w/train.ffm
-     eval_file  :  data/sample_2000w/eval.ffm
-     FEATURE_COUNT : 885789
+#     train_file  :  data/sample_2000w/train.ffm
+#     eval_file  :  data/sample_2000w/eval.ffm
+#     FEATURE_COUNT : 885789
 #     train_file  :  data/train.ffm
 #     eval_file  :  data/eval.ffm
 #     FEATURE_COUNT : 1738970
@@ -23,19 +29,23 @@ data:
 model:
     method : classification
     model_type : HOA
-    embedding_dim : 16
-    orders : 2
-    layer_sizes : [256, 128, 64, 1]         # combined dnn
-    layer_activations : [relu, relu, relu]  # combined dnn
-    layer_dropout : 0.1
+    embedding_dim : 10
+    orders : 3
+    dropout : [0.0]
+    cross_layer_heads : [2, 2, 2]
+    cross_layer_dims : [32, 16, 8]                # working if do_projection=True
 
-    # len must equal to orders
-    cross_layer_heads : [2, 2]
-    cross_layer_dims : [8, 8]                # only work if projection=True
+    # combination part
+    layer_sizes : [128, 128]
+    layer_activations : [relu, relu]
 
-    # only work if reduce=mlp_pooling
-    reduce_layer_sizes : [256, 256]
-    reduce_layer_activations : [0.3, 0.3]
+    # working if reduce=mlp_pooling
+    reduce_layer_sizes : [256, 128, 256, 128, 256, 128, 256, 128]
+    reduce_layer_activations : [elu, identity, elu, identity, elu, identity, elu, identity]
+
+    # working if dnn part valid
+    dnn_layer_sizes : [400, 400, 400]
+    dnn_layer_activations : [relu, relu, relu]
 #    load_model_name : ./checkpoint/epoch_1
 
 
@@ -45,14 +55,14 @@ train:
     init_method: tnormal
     init_value : 0.1
     embed_l2 : 0.001
-    embed_l1 : 0.000
+    embed_l1 : 0.00
     layer_l2 : 0.001
-    layer_l1 : 0.000
+    layer_l1 : 0.00
     learning_rate : 0.001
     loss : log_loss
     optimizer : adam
-    epochs : 10
-    batch_size : 2048
+    epochs : 20
+    batch_size : 512
 
 #show info
 #metric :'auc','logloss', 'group_auc'

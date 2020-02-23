@@ -6,15 +6,18 @@ data:
 #     train_file  :  data/sample/train.ffm
 #     eval_file  :  data/sample/eval.ffm
 #     FEATURE_COUNT : 28651
+     train_file  :  data/sample_50w/train.ffm
+     eval_file  :  data/sample_50w/eval.ffm
+     FEATURE_COUNT : 69818
 #     train_file  :  data/sample_1000w/train.ffm
 #     eval_file  :  data/sample_1000w/eval.ffm
 #     FEATURE_COUNT : 522604
 #     train_file  :  data/sample_2000w/train.ffm
 #     eval_file  :  data/sample_2000w/eval.ffm
 #     FEATURE_COUNT : 885789
-     train_file  :  data/train.ffm
-     eval_file  :  data/eval.ffm
-     FEATURE_COUNT : 1738970
+#     train_file  :  data/train.ffm
+#     eval_file  :  data/eval.ffm
+#     FEATURE_COUNT : 1738970
      FIELD_COUNT :  39
      data_format : ffm
 
@@ -46,12 +49,12 @@ train:
     loss : log_loss
     optimizer : adam
     epochs : 10
-    batch_size : 2048
+    batch_size : 512
 
 #show info
 #metric :'auc','logloss', 'group_auc'
 info:
     show_step : 20
-    save_epoch : 2
+    save_epoch : 10
     metrics : ['auc','logloss']
 

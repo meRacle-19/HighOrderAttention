@@ -21,13 +21,14 @@ class ExtremeDeepFMModel(BaseModel):
                                                  dtype=tf.float32)
                 self.embed_params.append(self.embedding)
                 self.embed_out, embed_layer_size = self._build_embedding(hparams)
-            logit = self._build_linear(hparams)
+            logit = tf.zeros([1])
+            #logit = self._build_linear(hparams)
             # logit = tf.add(logit, self._build_fm(hparams))
             # res: use resnet?  direct: without split?  reduce_D: Dimension reduction?  f_dim: dimension of reduce_D
             logit = tf.add(logit, self._build_extreme_FM(hparams, self.embed_out,
                                                          res=False, direct=False, bias=False, reduce_D=False, f_dim=2))
-            # logit = tf.add(logit, self._build_extreme_FM_quick(hparams, embed_out))
-            logit = tf.add(logit, self._build_dnn(hparams, self.embed_out, embed_layer_size))
+            #logit = tf.add(logit, self._build_extreme_FM_quick(hparams, embed_out))
+            #logit = tf.add(logit, self._build_dnn(hparams, self.embed_out, embed_layer_size))
             return logit
 
     def _build_embedding(self, hparams):
@@ -168,9 +169,7 @@ class ExtremeDeepFMModel(BaseModel):
                 self.layer_params.append(b_nn_output1)
                 exFM_out0 = tf.nn.xw_plus_b(result, w_nn_output1, b_nn_output1)
                 exFM_out1 = self._active_layer(logit=exFM_out0,
-                                               scope=scope,
-                                               activation="relu",
-                                               layer_idx=0)
+                                               activation="relu")
                 w_nn_output2 = tf.get_variable(name='w_nn_output2',
                                                shape=[128 + final_len, 1],
                                                dtype=tf.float32)
@@ -294,12 +293,9 @@ class ExtremeDeepFMModel(BaseModel):
                 curr_hidden_nn_layer = tf.nn.xw_plus_b(hidden_nn_layers[layer_idx],
                                                        curr_w_nn_layer,
                                                        curr_b_nn_layer)
-                scope = "nn_part" + str(idx)
                 activation = hparams.activation[idx]
                 curr_hidden_nn_layer = self._active_layer(logit=curr_hidden_nn_layer,
-                                                          scope=scope,
-                                                          activation=activation,
-                                                          layer_idx=idx)
+                                                          activation=activation)
                 hidden_nn_layers.append(curr_hidden_nn_layer)
                 layer_idx += 1
                 last_layer_size = layer_size

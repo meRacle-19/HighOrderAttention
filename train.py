@@ -18,7 +18,7 @@ from IO.ffm_cache import FfmCache
 #from src.deepcross import DeepCrossModel
 from src.exDeepFM import ExtremeDeepFMModel
 from src.CIN import CINModel
-from src.HOA import HighOrderAttentionModel
+from src.HOA import DeepAttentionalCrossingModel
 #from src.cross import CrossModel
 import utils.util as util
 import utils.metric as metric
@@ -212,8 +212,8 @@ def train(hparams, scope=None, target_session=""):
         print("run extreme cin model!")
         model_creator = CINModel
     elif hparams.model_type == "HOA":
-        print("runn high order attention model!")
-        model_creator = HighOrderAttentionModel
+        print("runn deep attentional crossing model!")
+        model_creator = DeepAttentionalCrossingModel
     
     else:
         raise ValueError("model type should be cccfnet, deepFM, deepWide, dnn, fm, lr, ipnn, opnn, din")

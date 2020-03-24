@@ -258,8 +258,11 @@ def train(hparams, scope=None, target_session=""):
                 if step % hparams.show_step == 0:
                     print('step {0:d} , total_loss: {1:.4f}, data_loss: {2:.4f}' \
                           .format(step, step_loss, step_data_loss))
+                    hparams.logger.info('step {0:d} , total_loss: {1:.4f}, data_loss: {2:.4f}' \
+                                        .format(step, step_loss, step_data_loss))
             except tf.errors.OutOfRangeError:
                print('finish one epoch!')
+               hparams.logger.info('finish one epoch!')
                break
         train_end = time.time()
         train_time = train_end - train_start

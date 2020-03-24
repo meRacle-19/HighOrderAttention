@@ -18,6 +18,7 @@ from IO.ffm_cache import FfmCache
 #from src.deepcross import DeepCrossModel
 from src.exDeepFM import ExtremeDeepFMModel
 from src.CIN import CINModel
+from src.HOA import DeepAttentionalCrossingModel
 #from src.cross import CrossModel
 import utils.util as util
 import utils.metric as metric
@@ -147,10 +148,11 @@ def cache_data(hparams, filename, flag):
         print("data sample num:{0}".format(sample_num))
         with open(sample_num_path, 'w') as f:
             f.write(str(sample_num) + '\n')
+        """
         with open(impression_id_path, 'w') as f:
             for impression_id in impression_id_list:
                 f.write(str(impression_id) + '\n')
-
+        """
 
 def train(hparams, scope=None, target_session=""):
     params = hparams.values()
@@ -209,6 +211,9 @@ def train(hparams, scope=None, target_session=""):
     elif hparams.model_type == 'CIN':
         print("run extreme cin model!")
         model_creator = CINModel
+    elif hparams.model_type == "HOA":
+        print("runn deep attentional crossing model!")
+        model_creator = DeepAttentionalCrossingModel
     
     else:
         raise ValueError("model type should be cccfnet, deepFM, deepWide, dnn, fm, lr, ipnn, opnn, din")

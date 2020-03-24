@@ -5,10 +5,11 @@ import time, yaml
 from packaging import version
 
 RES_DIR = './res/'
-CACHE_DIR = './cache/'
+CACHE_DIR = './cache/sample_50w/'
 MODEL_DIR = './checkpoint/'
 CONFIG_DIR = './config/'
-TRAIN_YAML = 'exDeepFM.yaml'
+# TRAIN_YAML = 'exDeepFM.yaml'
+TRAIN_YAML = 'HOA.yaml'
 TRAIN_NUM = './cache/train_num.csv'
 EVAL_NUM = './cache/eval_num.csv'
 TEST_NUM = './cache/test_num.csv'

@@ -6,6 +6,9 @@ data:
 #     train_file  :  data/sample/train.ffm
 #     eval_file  :  data/sample/eval.ffm
 #     FEATURE_COUNT : 28651
+#     train_file  :  data/sample_500w/train.ffm
+#     eval_file  :  data/sample_500w/eval.ffm
+#     FEATURE_COUNT : 315081
      train_file  :  data/sample_50w/train.ffm
      eval_file  :  data/sample_50w/eval.ffm
      FEATURE_COUNT : 69818
@@ -25,12 +28,24 @@ data:
 #model_type:deepFM or deepWide or dnn or ipnn or opnn or fm or lr
 model:
     method : classification
-    model_type : exDeepFM
-    dim : 10
-    layer_sizes : [400, 400, 400, 400]
-    activation : [relu, relu, relu, relu]
-    dropout : [0.0, 0.0, 0.0, 0.0]
-    cross_layer_sizes : [100, 100, 50]
+    model_type : HOA
+    embedding_dim : 10
+    orders : 3
+    dropout : [0.0]
+    cross_layer_heads : [2, 2, 2]
+    cross_layer_dims : [32, 16, 8]                # working if do_projection=True
+
+    # combination part
+    layer_sizes : [128, 128]
+    layer_activations : [relu, relu]
+
+    # working if reduce=mlp_pooling
+    reduce_layer_sizes : [256, 128, 256, 128, 256, 128, 256, 128]
+    reduce_layer_activations : [elu, identity, elu, identity, elu, identity, elu, identity]
+
+    # working if dnn part valid
+    dnn_layer_sizes : [400, 400, 400]
+    dnn_layer_activations : [relu, relu, relu]
 #    load_model_name : ./checkpoint/epoch_1
 
 
@@ -40,21 +55,19 @@ train:
     init_method: tnormal
     init_value : 0.1
     embed_l2 : 0.001
-    embed_l1 : 0.0000
+    embed_l1 : 0.00
     layer_l2 : 0.001
-    layer_l1 : 0.0000
-    cross_l2 : 0.0000
-    cross_l1 : 0.000
+    layer_l1 : 0.00
     learning_rate : 0.001
     loss : log_loss
     optimizer : adam
-    epochs : 10
+    epochs : 20
     batch_size : 512
 
 #show info
 #metric :'auc','logloss', 'group_auc'
 info:
     show_step : 20
-    save_epoch : 10
+    save_epoch : 2
     metrics : ['auc','logloss']
 

@@ -39,7 +39,6 @@ def create_hparams(FLAGS):
         n_item_attr=FLAGS['n_item_attr'] if 'n_item_attr' in FLAGS else None,
         # model
         dim=FLAGS['dim'] if 'dim' in FLAGS else None,
-        layer_sizes=FLAGS['layer_sizes'] if 'layer_sizes' in FLAGS else None,
         cross_layer_sizes=FLAGS['cross_layer_sizes'] if 'cross_layer_sizes' in FLAGS else None,
         cross_layers = FLAGS['cross_layers'] if 'cross_layers' in FLAGS else None,
         activation=FLAGS['activation'] if 'activation' in FLAGS else None,
@@ -51,6 +50,18 @@ def create_hparams(FLAGS):
         method=FLAGS['method'] if 'method' in FLAGS else None,
         load_model_name=FLAGS['load_model_name'] if 'load_model_name' in FLAGS else None,
         mu=FLAGS['mu'] if 'mu' in FLAGS else None,
+        embedding_dim=FLAGS['embedding_dim'] if 'embedding_dim' in FLAGS else None,
+        orders=FLAGS['orders'] if 'orders' in FLAGS else None,
+        layer_dropout=FLAGS['layer_dropout'] if 'layer_dropout' in FLAGS else None,
+        cross_layer_heads=FLAGS['cross_layer_heads'] if 'cross_layer_heads' in FLAGS else None,
+        cross_layer_dims=FLAGS['cross_layer_dims'] if 'cross_layer_dims' in FLAGS else None,
+        dnn_layer_activations=FLAGS['dnn_layer_activations'] if 'dnn_layer_activations' in FLAGS else None,
+        dnn_layer_sizes=FLAGS['dnn_layer_sizes'] if 'dnn_layer_sizes' in FLAGS else None,
+        reduce_layer_activations=FLAGS['reduce_layer_activations'] if 'reduce_layer_activations' in FLAGS else None,
+        reduce_layer_sizes=FLAGS['reduce_layer_sizes'] if 'reduce_layer_sizes' in FLAGS else None,
+        layer_activations=FLAGS['layer_activations'] if 'layer_activations' in FLAGS else None,
+        layer_sizes=FLAGS['layer_sizes'] if 'layer_sizes' in FLAGS else None,
+
         # train
         init_method=FLAGS['init_method'] if 'init_method' in FLAGS else 'tnormal',
         init_value=FLAGS['init_value'] if 'init_value' in FLAGS else 0.01,
@@ -79,13 +90,13 @@ def check_type(config):
     # check parameter type
     int_parameters = ['FEATURE_COUNT', 'FIELD_COUNT', 'dim', 'epochs', 'batch_size', 'show_step', \
                       'save_epoch', 'PAIR_NUM', 'DNN_FIELD_NUM', 'attention_layer_sizes', \
-                      'n_user', 'n_item', 'n_user_attr', 'n_item_attr']
+                      'n_user', 'n_item', 'n_user_attr', 'n_item_attr', 'embedding_dim', 'orders']
     for param in int_parameters:
         if param in config and not isinstance(config[param], int):
             raise TypeError("parameters {0} must be int".format(param))
 
     float_parameters = ['init_value', 'learning_rate', 'embed_l2', \
-                        'embed_l1', 'layer_l2', 'layer_l1', 'mu']
+                        'embed_l1', 'layer_l2', 'layer_l1', 'mu', 'layer_dropout']
     for param in float_parameters:
         if param in config and not isinstance(config[param], float):
             raise TypeError("parameters {0} must be float".format(param))
@@ -96,7 +107,11 @@ def check_type(config):
         if param in config and not isinstance(config[param], str):
             raise TypeError("parameters {0} must be str".format(param))
 
-    list_parameters = ['layer_sizes', 'activation', 'dropout']
+    list_parameters = ['layer_sizes', 'activation', 'dropout',  \
+                       'layer_activations',  \
+                       "reduce_layer_sizes", "reduce_layer_activations",
+                       'cross_layer_heads', 'cross_layer_dims',
+                       'dnn_layer_activations', 'dnn_layer_sizes']
     for param in list_parameters:
         if param in config and not isinstance(config[param], list):
             raise TypeError("parameters {0} must be list".format(param))
@@ -127,6 +142,10 @@ def check_nn_config(config):
         required_parameters = ['train_file', 'eval_file', 'FIELD_COUNT', 'FEATURE_COUNT', 'method',
                                'dim', 'layer_sizes', 'cross_layers', 'activation', 'loss', 'data_format',
                                'dropout']
+    elif config['model']['model_type'] in ['HOA']:
+        required_parameters = ['train_file', 'eval_file', 'FIELD_COUNT', 'FEATURE_COUNT', 'method', 'embedding_dim',
+                               'orders', 'cross_layer_heads', 'layer_sizes',
+                               'layer_activations', 'dropout']
     else:
         required_parameters = ['train_file', 'eval_file', 'FIELD_COUNT', 'FEATURE_COUNT', 'method',
                                'dim', 'layer_sizes', 'activation', 'loss', 'data_format', 'dropout']
@@ -152,10 +171,12 @@ def check_nn_config(config):
 def check_config(config):
     """check networks config"""
     if config['model']['model_type'] not in ['deepFM', 'deepWide', 'dnn', 'ipnn', \
-                                             'opnn', 'fm', 'lr', 'din', 'cccfnet', 'deepcross', 'exDeepFM', "cross", "CIN"]:
+                                             'opnn', 'fm', 'lr', 'din', 'cccfnet', \
+                                             'deepcross', 'exDeepFM', "cross", "CIN", \
+                                             'HOA']:
         raise ValueError(
-            "model type must be cccfnet, deepFM, deepWide, dnn, ipnn, opnn, fm, lr, din, deepcross, exDeepFM, cross, CIN but you set is {0}".format(
-                config['model']['model_type']))
+            "model type must be cccfnet, deepFM, deepWide, dnn, ipnn, opnn, fm, lr, \
+             din, deepcross, exDeepFM, cross, CIN but you set is {0}".format(config['model']['model_type']))
     check_nn_config(config)
 
 

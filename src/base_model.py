@@ -63,7 +63,7 @@ class BaseModel(object):
 
     def _l1_loss(self, hparams):
         l1_loss = tf.zeros([1], dtype=tf.float32)
-        # embedding_layer l2 loss
+        # embedding_layer l1 loss
         for param in self.embed_params:
             l1_loss = tf.add(l1_loss, tf.multiply(hparams.embed_l1, tf.norm(param, ord=1)))
         params = self.layer_params
@@ -155,10 +155,28 @@ class BaseModel(object):
         train_step = train_opt(hparams)
         return train_step
 
-    def _active_layer(self, logit, scope, activation, layer_idx):
-        logit = self._dropout(logit, layer_idx)
+    def _active_layer(self, logit, activation, idx=0):
+        logit = self._dropout(logit, idx)
         logit = self._activate(logit, activation)
         return logit
+
+    def _normalize(self, inputs, epsilon=1e-8):
+        '''
+        Applies layer normalization
+        Args:
+            inputs: A tensor with 2 or more dimensions
+            epsilon: A floating number to prevent Zero Division
+        Returns:
+            A tensor with the same shape and data dtype
+        '''
+        inputs_shape = inputs.get_shape()
+        params_shape = inputs_shape[-1:]
+        mean, variance = tf.nn.moments(inputs, [-1], keep_dims=True)
+        beta = tf.Variable(tf.zeros(params_shape))
+        gamma = tf.Variable(tf.ones(params_shape))
+        normalized = (inputs - mean) / ((variance + epsilon) ** (.5))
+        outputs = gamma * normalized + beta
+        return outputs
 
     def _activate(self, logit, activation):
         if activation == 'sigmoid':
@@ -176,8 +194,39 @@ class BaseModel(object):
         else:
             raise ValueError("this activations not defined {0}".format(activation))
 
-    def _dropout(self, logit, layer_idx):
-        logit = tf.nn.dropout(x=logit, keep_prob=self.layer_keeps[layer_idx])
+    def _dnn(self, input_embed, layer_sizes=[], activations=[], name=None):
+        last_layer_size = input_embed.get_shape().as_list()[-1]
+        hidden_nn_layers = [input_embed]
+        with tf.variable_scope(name, initializer=self.initializer) as scope:
+            for idx, layer_size in enumerate(layer_sizes):
+                w_name = 'w_layer_{}'.format(idx)
+                b_name = 'b_layer_{}'.format(idx)
+                curr_w_nn_layer = tf.get_variable(name=w_name,
+                                                  shape=[last_layer_size, layer_size],
+                                                  dtype=tf.float32,
+                                                  initializer=tf.truncated_normal_initializer(0, 1/(last_layer_size+layer_size)))
+                curr_b_nn_layer = tf.get_variable(name=b_name,
+                                                  shape=[layer_size],
+                                                  dtype=tf.float32,
+                                                  initializer=tf.zeros_initializer())
+                self.layer_params.append(curr_w_nn_layer)
+                self.layer_params.append(curr_b_nn_layer)
+                tf.summary.histogram(w_name, curr_w_nn_layer)
+                tf.summary.histogram(b_name, curr_b_nn_layer)
+                curr_hidden_nn_layer = tf.nn.xw_plus_b(hidden_nn_layers[idx],
+                                                       curr_w_nn_layer,
+                                                       curr_b_nn_layer)
+
+                activation = activations[idx]
+                curr_hidden_nn_layer = self._active_layer(logit=curr_hidden_nn_layer,
+                                                          activation=activation)
+                hidden_nn_layers.append(curr_hidden_nn_layer)
+                last_layer_size = layer_size
+            return hidden_nn_layers[-1]
+
+
+    def _dropout(self, logit, idx=0):
+        logit = tf.nn.dropout(x=logit, keep_prob=self.layer_keeps[idx])
         return logit
 
     def train(self, sess):

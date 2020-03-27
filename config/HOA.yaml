@@ -6,15 +6,15 @@ data:
 #     train_file  :  data/sample/train.ffm
 #     eval_file  :  data/sample/eval.ffm
 #     FEATURE_COUNT : 28651
+#     train_file  :  data/sample_50w/train.ffm
+#     eval_file  :  data/sample_50w/eval.ffm
+#     FEATURE_COUNT : 69818
 #     train_file  :  data/sample_500w/train.ffm
 #     eval_file  :  data/sample_500w/eval.ffm
 #     FEATURE_COUNT : 315081
-     train_file  :  data/sample_50w/train.ffm
-     eval_file  :  data/sample_50w/eval.ffm
-     FEATURE_COUNT : 69818
-#     train_file  :  data/sample_1000w/train.ffm
-#     eval_file  :  data/sample_1000w/eval.ffm
-#     FEATURE_COUNT : 522604
+     train_file  :  data/sample_1000w/train.ffm
+     eval_file  :  data/sample_1000w/eval.ffm
+     FEATURE_COUNT : 522604
 #     train_file  :  data/sample_2000w/train.ffm
 #     eval_file  :  data/sample_2000w/eval.ffm
 #     FEATURE_COUNT : 885789
@@ -54,11 +54,11 @@ model:
 train:
     init_method: tnormal
     init_value : 0.1
-    embed_l2 : 0.001
+    embed_l2 : 0.0005
     embed_l1 : 0.00
-    layer_l2 : 0.001
+    layer_l2 : 0.0005
     layer_l1 : 0.00
-    learning_rate : 0.001
+    learning_rate : 0.0005
     loss : log_loss
     optimizer : adam
     epochs : 20

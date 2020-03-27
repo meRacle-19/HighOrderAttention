@@ -237,6 +237,22 @@ class DeepAttentionalCrossingModel(BaseModel):
                 for output in nn_outputs[0:]:
                     combine_outputs.append(tf.reduce_sum(output, axis=1))
                 combined = tf.concat(combine_outputs, axis=1)
+            elif reduce in ['cnn_pooling']:
+                combine_outputs = []
+                for poly,output in enumerate(nn_outputs,start=2):
+                    combine_cnn = []
+                    for width in list(range(1,4)):
+                        embed_dim = output.get_shape().as_list()[-1]
+                        output_1 = tf.reshape(output,[-1, field_num, embed_dim, 1])
+                        conv_filter = tf.get_variable(name='conv_layer_{}_{}'.format(poly,width),
+                                                        shape=[1, embed_dim, 1, 1],
+                                                        dtype=tf.float32)
+                        output_2 = tf.nn.conv2d(output_1, conv_filter, [1,1,1,1], padding='VALID')
+                        output_3 = tf.nn.max_pool(output_2, [1, field_num, 1, 1], [1, 1, 1, 1], padding='VALID')
+                        output_4 = tf.reshape(output_3, [-1, 1])
+                        combine_cnn.append(output_4)
+                    combine_outputs = tf.concat(combine_cnn, axis=1)
+                combined = tf.concat(combine_outputs, axis=1)
             elif reduce in ['sum']:
                 combine_outputs = []
                 for idx, output in enumerate(nn_outputs[1:], start=0):

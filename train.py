@@ -251,15 +251,15 @@ def train(hparams, scope=None, target_session=""):
                 step_result = train_model.model.train(train_sess)
                 t3 = time.time()
                 train_load_time += t3 - t1
-                (_, step_loss, step_data_loss, summary) = step_result
+                (_, step_loss, step_data_loss, auc, summary) = step_result
                 writer.add_summary(summary, step)
                 epoch_loss += step_loss
                 step += 1
                 if step % hparams.show_step == 0:
-                    print('step {0:d} , total_loss: {1:.4f}, data_loss: {2:.4f}' \
-                          .format(step, step_loss, step_data_loss))
-                    hparams.logger.info('step {0:d} , total_loss: {1:.4f}, data_loss: {2:.4f}' \
-                                        .format(step, step_loss, step_data_loss))
+                    print('step {0:d} , total_loss: {1:.4f}, data_loss: {2:.4f}, auc: {3}' \
+                          .format(step, step_loss, step_data_loss, auc[0]))
+                    hparams.logger.info('step {0:d} , total_loss: {1:.4f}, data_loss: {2:.4f}, auc: {3}' \
+                                        .format(step, step_loss, step_data_loss, auc[0]))
             except tf.errors.OutOfRangeError:
                print('finish one epoch!')
                hparams.logger.info('finish one epoch!')

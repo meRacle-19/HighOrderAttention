@@ -25,9 +25,10 @@ class BaseModel(object):
         self.data_loss = self._compute_data_loss(hparams)
         self.regular_loss = self._compute_regular_loss(hparams)
         self.loss = tf.add(self.data_loss, self.regular_loss)
+        self.auc = self._compute_auc()
         self.saver = tf.train.Saver(max_to_keep=hparams.epochs)
         self.update = self._build_train_opt(hparams)
-        self.init_op = tf.global_variables_initializer()
+        self.init_op = tf.group(tf.global_variables_initializer(),tf.local_variables_initializer())
         self.merged = self._add_summaries()
 
     def _get_pred(self, logit, hparams):
@@ -97,6 +98,13 @@ class BaseModel(object):
                 factor=2.0, mode='FAN_IN', uniform=True)
         else:
             return tf.truncated_normal_initializer(stddev=hparams.init_value)
+
+    def _compute_auc(self):
+        auc = tf.metrics.auc(
+            labels = tf.reshape(self.iterator.labels, [-1]),
+            predictions = tf.reshape(self.pred, [-1])
+        )
+        return auc
 
     def _compute_data_loss(self, hparams):
         if hparams.loss == 'cross_entropy_loss':
@@ -230,7 +238,7 @@ class BaseModel(object):
         return logit
 
     def train(self, sess):
-        return sess.run([self.update, self.loss, self.data_loss, self.merged], \
+        return sess.run([self.update, self.loss, self.data_loss, self.auc, self.merged], \
                         feed_dict={self.layer_keeps: self.keep_prob_train})
 
     def eval(self, sess):

@@ -22,13 +22,13 @@ class ExtremeDeepFMModel(BaseModel):
                 self.embed_params.append(self.embedding)
                 self.embed_out, embed_layer_size = self._build_embedding(hparams)
             logit = tf.zeros([1])
-            #logit = self._build_linear(hparams)
+            logit = self._build_linear(hparams)
             # logit = tf.add(logit, self._build_fm(hparams))
             # res: use resnet?  direct: without split?  reduce_D: Dimension reduction?  f_dim: dimension of reduce_D
             logit = tf.add(logit, self._build_extreme_FM(hparams, self.embed_out,
                                                          res=False, direct=False, bias=False, reduce_D=False, f_dim=2))
             #logit = tf.add(logit, self._build_extreme_FM_quick(hparams, embed_out))
-            #logit = tf.add(logit, self._build_dnn(hparams, self.embed_out, embed_layer_size))
+            logit = tf.add(logit, self._build_dnn(hparams, self.embed_out, embed_layer_size))
             return logit
 
     def _build_embedding(self, hparams):

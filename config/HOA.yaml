@@ -33,7 +33,7 @@ model:
     orders : 3
     dropout : [0.0]
     cross_layer_heads : [2, 2, 2]
-    cross_layer_dims : [32, 16, 8]                # working if do_projection=True
+    cross_layer_dims : [32, 32, 32]                # working if do_projection=True
 
     # combination part
     layer_sizes : [128, 128]

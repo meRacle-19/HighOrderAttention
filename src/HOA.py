@@ -23,7 +23,7 @@ class DeepAttentionalCrossingModel(BaseModel):
             #logit = tf.add(logit, self._build_linear(hparams))
             #logit = tf.add(logit, self._build_fm(hparams))
             logit.append(self._build_HOA(hparams, self.embed_out, reduce='sum_pooling', do_projection=True, has_residual=True))
-            #logit.append(self._dnn(self.embed_out, hparams.dnn_layer_sizes, hparams.dnn_layer_activations, name='dnn_part'))
+            logit.append(self._dnn(self.embed_out, hparams.dnn_layer_sizes, hparams.dnn_layer_activations, name='dnn_part'))
 
             return self._dnn(tf.concat(logit,axis=1), [1], ['identity'], name="combination")
 

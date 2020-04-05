@@ -1,26 +1,15 @@
 #data
 #data format:ffm
 data:
-     # test_file  : data/test.ffm
      # infer_file  :  data/test.ffm
-#     train_file  :  data/sample/train.ffm
-#     eval_file  :  data/sample/eval.ffm
-#     FEATURE_COUNT : 28651
-#     train_file  :  data/sample_50w/train.ffm
-#     eval_file  :  data/sample_50w/eval.ffm
-#     FEATURE_COUNT : 69818
-#     train_file  :  data/sample_500w/train.ffm
-#     eval_file  :  data/sample_500w/eval.ffm
-#     FEATURE_COUNT : 315081
-     train_file  :  data/sample_1000w/train.ffm
-     eval_file  :  data/sample_1000w/eval.ffm
-     FEATURE_COUNT : 522604
-#     train_file  :  data/sample_2000w/train.ffm
-#     eval_file  :  data/sample_2000w/eval.ffm
-#     FEATURE_COUNT : 885789
-#     train_file  :  data/train.ffm
-#     eval_file  :  data/eval.ffm
-#     FEATURE_COUNT : 1738970
+     train_file : data/sample_10w/train.ffm
+     eval_file  : data/sample_10w/eval.ffm
+     test_file  : data/sample_10w/test.ffm
+     FEATURE_COUNT : 66384
+     #train_file : data/sample_1000w/train.ffm
+     #eval_file  : data/sample_1000w/eval.ffm
+     #test_file  : data/sample_1000w/test.ffm
+     #FEATURE_COUNT : 1806715
      FIELD_COUNT :  39
      data_format : ffm
 
@@ -28,12 +17,12 @@ data:
 #model_type:deepFM or deepWide or dnn or ipnn or opnn or fm or lr
 model:
     method : classification
-    model_type : HOA
+    model_type : DACN
     embedding_dim : 10
     orders : 3
     dropout : [0.0]
     cross_layer_heads : [2, 2, 2]
-    cross_layer_dims : [32, 32, 32]                # working if do_projection=True
+    cross_layer_dims : [32, 16, 8]                # working if do_projection=True
 
     # combination part
     layer_sizes : [128, 128]
@@ -44,7 +33,7 @@ model:
     reduce_layer_activations : [elu, identity, elu, identity, elu, identity, elu, identity]
 
     # working if dnn part valid
-    dnn_layer_sizes : [400, 400, 400]
+    dnn_layer_sizes : [256, 256, 256]
     dnn_layer_activations : [relu, relu, relu]
 #    load_model_name : ./checkpoint/epoch_1
 
@@ -68,6 +57,6 @@ train:
 #metric :'auc','logloss', 'group_auc'
 info:
     show_step : 20
-    save_epoch : 2
+    save_epoch : 10
     metrics : ['auc','logloss']
 

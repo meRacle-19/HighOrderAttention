@@ -15,7 +15,7 @@ import pandas as pd
 def sample(input_path, train_path, eval_path, test_path, gen_file=True, debug=None, cols=[]):
     source = pd.read_csv(input_path, nrows=debug, header=None, names=cols, sep='\t')
     source = source.sample(frac=1.0)  # 全部打乱
-    cut_idx1 = int(round(0.09 * source.shape[0]))
+    cut_idx1 = int(round(0.1 * source.shape[0]))
     cut_idx2 = int(round(0.1 * source.shape[0]))
 
     df_test, df_eval, df_train = source.iloc[:cut_idx1], source.iloc[cut_idx1:cut_idx2], source.iloc[cut_idx2:]

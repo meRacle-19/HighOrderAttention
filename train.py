@@ -5,21 +5,16 @@ import tensorflow as tf
 from IO.iterator import FfmIterator #, DinIterator, CCCFNetIterator
 #from IO.din_cache import DinCache
 from IO.ffm_cache import FfmCache
-#from IO.cccfnet_cache import CCCFNetCache
-#from src.deep_fm import DeepfmModel
-#from src.deep_wide import DeepWideModel
-#from src.fm import FmModel
-#from src.dnn import DnnModel
-#from src.opnn import OpnnModel
-#from src.ipnn import IpnnModel
-#from src.lr import LrModel
-#from src.din import DinModel
-#from src.cccfnet import CCCFModel
-#from src.deepcross import DeepCrossModel
+from src.LR import LRModel
+from src.FM import FMModel
+from src.cross import CrossModel
+from src.CIN import CompressedInteractionNetworkModel
+from src.HOA import HigherOrderAttentionModel
+from src.DNN import DNNModel
+from src.deepWide import DeepWideModel
+from src.deepCross import DeepCrossModel
 from src.exDeepFM import ExtremeDeepFMModel
-from src.CIN import CINModel
-from src.HOA import DeepAttentionalCrossingModel
-#from src.cross import CrossModel
+from src.DACN import DeepAttentionalCrossingModel
 import utils.util as util
 import utils.metric as metric
 # from utils.log import Log
@@ -41,10 +36,6 @@ def create_train_model(model_creator, hparams, scope=None):
 
         if hparams.data_format == 'ffm':
             batch_input = FfmIterator(src_dataset)
-        elif hparams.data_format == 'din':
-            batch_input = DinIterator(src_dataset)
-        elif hparams.data_format == 'cccfnet':
-            batch_input = CCCFNetIterator(src_dataset)
         else:
             raise ValueError("not support {0} format data".format(hparams.data_format))
         # build model
@@ -108,51 +99,38 @@ def run_infer(load_model, load_sess, filename, hparams, sample_num_file):
 def cache_data(hparams, filename, flag):
     if hparams.data_format == 'ffm':
         cache_obj = FfmCache()
-    elif hparams.data_format == 'din':
-        cache_obj = DinCache()
-    elif hparams.data_format == 'cccfnet':
-        cache_obj = CCCFNetCache()
     else:
         raise ValueError(
-            "data format must be ffm, din, cccfnet, this format not defined {0}".format(hparams.data_format))
+            "data format must be ffm, this format not defined {0}".format(hparams.data_format))
     if not os.path.exists(util.CACHE_DIR):
         os.mkdir(util.CACHE_DIR)
     if flag == 'train':
         hparams.train_file_cache = util.convert_cached_name(hparams.train_file, hparams.batch_size)
         cached_name = hparams.train_file_cache
         sample_num_path = util.TRAIN_NUM
-        impression_id_path = util.TRAIN_IMPRESSION_ID
     elif flag == 'eval':
         hparams.eval_file_cache = util.convert_cached_name(hparams.eval_file, hparams.batch_size)
         cached_name = hparams.eval_file_cache
         sample_num_path = util.EVAL_NUM
-        impression_id_path = util.EVAL_IMPRESSION_ID
     elif flag == 'test':
         hparams.test_file_cache = util.convert_cached_name(hparams.test_file, hparams.batch_size)
         cached_name = hparams.test_file_cache
         sample_num_path = util.TEST_NUM
-        impression_id_path = util.TEST_IMPRESSION_ID
     elif flag == 'infer':
         hparams.infer_file_cache = util.convert_cached_name(hparams.infer_file, hparams.batch_size)
         cached_name = hparams.infer_file_cache
         sample_num_path = util.INFER_NUM
-        impression_id_path = util.INFER_IMPRESSION_ID
     else:
         raise ValueError("flag must be train, eval, test, infer")
     print('cache filename:', filename)
     if not os.path.isfile(cached_name):
         print('has not cached file, begin to cache')
         start_time = time.time()
-        sample_num, impression_id_list = cache_obj.write_tfrecord(filename, cached_name, hparams)
+        sample_num = cache_obj.write_tfrecord(filename, cached_name, hparams)[0]
         util.print_time("cached as {} used time".format(cached_name), start_time)
         print("data sample num:{0}".format(sample_num))
         with open(sample_num_path, 'w') as f:
             f.write(str(sample_num) + '\n')
-        """
-        with open(impression_id_path, 'w') as f:
-            for impression_id in impression_id_list:
-                f.write(str(impression_id) + '\n')
-        """
 
 def train(hparams, scope=None, target_session=""):
     params = hparams.values()
@@ -169,52 +147,37 @@ def train(hparams, scope=None, target_session=""):
     if hparams.infer_file is not None:
         cache_data(hparams, hparams.infer_file, flag='infer')
 
-    if hparams.model_type == 'deepFM':
-        model_creator = DeepfmModel
-        print("run deepfm model!")
-    elif hparams.model_type == 'deepWide':
+    if hparams.model_type == 'deepWide':
         model_creator = DeepWideModel
         print("run deepWide model!")
-    elif hparams.model_type == 'dnn':
+    elif hparams.model_type == 'DNN':
         print("run dnn model!")
-        model_creator = DnnModel
-    elif hparams.model_type == 'ipnn':
-        print("run ipnn model!")
-        model_creator = IpnnModel
-    elif hparams.model_type == 'opnn':
-        print("run opnn model!")
-        model_creator = OpnnModel
-    elif hparams.model_type == 'din':
-        print("run din model!")
-        model_creator = DinModel
-    elif hparams.model_type == 'fm':
+        model_creator = DNNModel
+    elif hparams.model_type == 'FM':
         print("run fm model!")
-        model_creator = FmModel
-    elif hparams.model_type == 'lr':
+        model_creator = FMModel
+    elif hparams.model_type == 'LR':
         print("run lr model!")
-        model_creator = LrModel
-    elif hparams.model_type == 'din':
-        print("run din model!")
-        model_creator = DinModel
-    elif hparams.model_type == 'cccfnet':
-        print("run cccfnet model!")
-        model_creator = CCCFModel
-    elif hparams.model_type == 'deepcross':
+        model_creator = LRModel
+    elif hparams.model_type == 'deepCross':
         print("run deepcross model!")
         model_creator = DeepCrossModel
     elif hparams.model_type == 'exDeepFM':
         print("run extreme deepFM model!")
         model_creator = ExtremeDeepFMModel
     elif hparams.model_type == 'cross':
-        print("run extreme cross model!")
+        print("run cross model!")
         model_creator = CrossModel
     elif hparams.model_type == 'CIN':
-        print("run extreme cin model!")
-        model_creator = CINModel
+        print("run cin model!")
+        model_creator = CompressedInteractionNetworkModel
     elif hparams.model_type == "HOA":
-        print("runn deep attentional crossing model!")
+        print("runn higher-order attention model!")
+        model_creator = HigherOrderAttentionModel
+    elif hparams.model_type == "DACN":
+        print("runn deep attentional crossing network model!")
         model_creator = DeepAttentionalCrossingModel
-    
+
     else:
         raise ValueError("model type should be cccfnet, deepFM, deepWide, dnn, fm, lr, ipnn, opnn, din")
 
@@ -255,11 +218,24 @@ def train(hparams, scope=None, target_session=""):
                 writer.add_summary(summary, step)
                 epoch_loss += step_loss
                 step += 1
+
                 if step % hparams.show_step == 0:
-                    print('step {0:d} , total_loss: {1:.4f}, data_loss: {2:.4f}, auc: {3}' \
+                    print('step {0:d} train info: total_loss: {1:.4f}, data_loss: {2:.4f}, auc: {3:.5f}' \
                           .format(step, step_loss, step_data_loss, auc[0]))
-                    hparams.logger.info('step {0:d} , total_loss: {1:.4f}, data_loss: {2:.4f}, auc: {3}' \
+                    hparams.logger.info('step {0:d} train info: total_loss: {1:.4f}, data_loss: {2:.4f}, auc:{3:.5f}' \
                                         .format(step, step_loss, step_data_loss, auc[0]))
+                """
+                if step % hparams.eval_step == 0:
+                    train_iter = train_model.iterator
+                    eval_res = run_eval(train_model, train_sess, hparams.eval_file_cache, util.EVAL_NUM, hparams,
+                                        flag='eval')
+                    eval_info = ', '.join(
+                          [str(item[0]) + ':' + str(item[1])
+                           for item in sorted(eval_res.items(), key=lambda x: x[0])])
+                    print('step {0:d}'.format(step) +  ' eval info: ' + eval_info)
+                    hparams.logger.info('step {0:d}'.format(step) +  ' eval info: ' + eval_info)
+                    train_model.model.iterator = train_iter
+                """
             except tf.errors.OutOfRangeError:
                print('finish one epoch!')
                hparams.logger.info('finish one epoch!')
@@ -273,40 +249,36 @@ def train(hparams, scope=None, target_session=""):
             # print(checkpoint_path)
         train_res = dict()
         train_res["loss"] = epoch_loss / step
-        eval_start = time.time()
+        test_start = time.time()
         # train_res = run_eval(train_model, train_sess, hparams.train_file_cache, util.TRAIN_NUM, hparams, flag='train')
-        eval_res = run_eval(train_model, train_sess, hparams.eval_file_cache, util.EVAL_NUM, hparams, flag='eval')
         train_info = ', '.join(
             [str(item[0]) + ':' + str(item[1])
              for item in sorted(train_res.items(), key=lambda x: x[0])])
-        eval_info = ', '.join(
-            [str(item[0]) + ':' + str(item[1])
-             for item in sorted(eval_res.items(), key=lambda x: x[0])])
         if hparams.test_file is not None:
             test_res = run_eval(train_model, train_sess, hparams.test_file_cache, util.TEST_NUM, hparams, flag='test')
             test_info = ', '.join(
                 [str(item[0]) + ':' + str(item[1])
                  for item in sorted(test_res.items(), key=lambda x: x[0])])
-        eval_end = time.time()
-        eval_time = eval_end - eval_start
+        test_end = time.time()
+        test_time = test_end - test_start
         if hparams.test_file is not None:
             print('at epoch {0:d}'.format(
-                epoch) + ' train info: ' + train_info + ' eval info: ' + eval_info + ' test info: ' + test_info)
+                epoch) + ' train info: ' + train_info + ' test info: ' + test_info)
             hparams.logger.info('at epoch {0:d}'.format(
-                epoch) + ' train info: ' + train_info + ' eval info: ' + eval_info + ' test info: ' + test_info)
+                epoch) + ' train info: ' + train_info + ' test info: ' + test_info)
         else:
-            print('at epoch {0:d}'.format(epoch) + ' train info: ' + train_info + ' eval info: ' + eval_info)
-            hparams.logger.info('at epoch {0:d}'.format(epoch) + ' train info: ' + train_info + ' eval info: ' + eval_info)
-        print('at epoch {0:d} , train time: {1:.1f} eval time: {2:.1f}'.format(epoch, train_time, eval_time))
+            print('at epoch {0:d}'.format(epoch) + ' train info: ' + train_info)
+            hparams.logger.info('at epoch {0:d}'.format(epoch) + ' train info: ' + train_info)
 
-        hparams.logger.info('at epoch {0:d} , train time: {1:.1f} eval time: {2:.1f}' \
-                    .format(epoch, train_time, eval_time))
+        print('at epoch {0:d} , train time: {1:.1f} test time: {2:.1f}'.format(epoch, train_time, test_time))
+        hparams.logger.info('at epoch {0:d} , train time: {1:.1f} test time: {2:.1f}' \
+                    .format(epoch, train_time, test_time))
         hparams.logger.info('\n')
 
-        if eval_res["auc"] - last_eval < - 0.003:
+        if test_res["auc"] - last_eval < - 0.0001:
             break
-        if eval_res["auc"] > last_eval:
-            last_eval = eval_res["auc"]
+        if test_res["auc"] > last_eval:
+            last_eval = test_res["auc"]
     writer.close()
     # after train,run infer
     if hparams.infer_file is not None:

@@ -143,12 +143,12 @@ if __name__ == '__main__':
     train_file = "../cache/train.csv"
     eval_file = "../cache/eval.csv"
     test_file = "../cache/test.csv"
-    out_dir = "../data/sample_1000w"
+    out_dir = "../data/sample_1w"
     fieldList = ['Label', 'I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 'I11', 'I12', 'I13', 'C1',
                  'C2', 'C3',
                  'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12', 'C13', 'C14', 'C15', 'C16', 'C17', 'C18',
                  'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26']
-    sample(input_path, train_file, eval_file, test_file, cols=fieldList, debug=10000000)
+    sample(input_path, train_file, eval_file, test_file, cols=fieldList, debug=10000)
     print('sample done.')
 
     # 统计category feat词频

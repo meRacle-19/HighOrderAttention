@@ -2,22 +2,26 @@
 #data format:ffm
 data:
      # infer_file  :  data/test.ffm
-     train_file : data/sample_10w/train.ffm
-     eval_file  : data/sample_10w/eval.ffm
-     test_file  : data/sample_10w/test.ffm
-     FEATURE_COUNT : 66384
-     #train_file : data/sample_1000w/train.ffm
-     #eval_file  : data/sample_1000w/eval.ffm
-     #test_file  : data/sample_1000w/test.ffm
-     #FEATURE_COUNT : 1806715
+#     train_file : data/sample_1w/train.ffm
+#     eval_file  : data/sample_1w/eval.ffm
+#     test_file  : data/sample_1w/test.ffm
+#     FEATURE_COUNT : 13553
+#     train_file : data/sample_10w/train.ffm
+#     eval_file  : data/sample_10w/eval.ffm
+#     test_file  : data/sample_10w/test.ffm
+#     FEATURE_COUNT : 66384
+     train_file : data/sample_1000w/train.ffm
+     eval_file  : data/sample_1000w/eval.ffm
+     test_file  : data/sample_1000w/test.ffm
+     FEATURE_COUNT : 1806715
      FIELD_COUNT :  39
      data_format : ffm
 
 #model
-#model_type:deepFM or deepWide or dnn or ipnn or opnn or fm or lr
+#model_type:HOA DACN
 model:
     method : classification
-    model_type : DACN
+    model_type : HOA
     embedding_dim : 10
     orders : 3
     dropout : [0.0]
@@ -25,16 +29,16 @@ model:
     cross_layer_dims : [32, 16, 8]                # working if do_projection=True
 
     # combination part
-    layer_sizes : [128, 128]
-    layer_activations : [relu, relu]
+    layer_sizes : [128, 128, 1]
+    layer_activations : [relu, relu, identity]
 
     # working if reduce=mlp_pooling
     reduce_layer_sizes : [256, 128, 256, 128, 256, 128, 256, 128]
     reduce_layer_activations : [elu, identity, elu, identity, elu, identity, elu, identity]
 
     # working if dnn part valid
-    dnn_layer_sizes : [256, 256, 256]
-    dnn_layer_activations : [relu, relu, relu]
+    dnn_layer_sizes : [256, 256, 256, 1]
+    dnn_layer_activations : [relu, relu, relu, identity]
 #    load_model_name : ./checkpoint/epoch_1
 
 

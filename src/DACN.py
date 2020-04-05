@@ -61,6 +61,36 @@ class DeepAttentionalCrossingModel(BaseModel):
             tf.summary.histogram("linear_part/b", b_linear)
             return linear_output
 
+    def _dnn(self, input_embed, layer_sizes=[], activations=[], name=None):
+        last_layer_size = input_embed.get_shape().as_list()[-1]
+        hidden_nn_layers = [input_embed]
+        with tf.variable_scope(name, initializer=self.initializer) as scope:
+            for idx, layer_size in enumerate(layer_sizes):
+                w_name = 'w_layer_{}'.format(idx)
+                b_name = 'b_layer_{}'.format(idx)
+                curr_w_nn_layer = tf.get_variable(name=w_name,
+                                                  shape=[last_layer_size, layer_size],
+                                                  dtype=tf.float32,
+                                                  initializer=tf.truncated_normal_initializer(0, 1/(last_layer_size+layer_size)))
+                curr_b_nn_layer = tf.get_variable(name=b_name,
+                                                  shape=[layer_size],
+                                                  dtype=tf.float32,
+                                                  initializer=tf.zeros_initializer())
+                self.layer_params.append(curr_w_nn_layer)
+                self.layer_params.append(curr_b_nn_layer)
+                tf.summary.histogram(w_name, curr_w_nn_layer)
+                tf.summary.histogram(b_name, curr_b_nn_layer)
+                curr_hidden_nn_layer = tf.nn.xw_plus_b(hidden_nn_layers[idx],
+                                                       curr_w_nn_layer,
+                                                       curr_b_nn_layer)
+
+                activation = activations[idx]
+                curr_hidden_nn_layer = self._active_layer(logit=curr_hidden_nn_layer,
+                                                          activation=activation)
+                hidden_nn_layers.append(curr_hidden_nn_layer)
+                last_layer_size = layer_size
+            return hidden_nn_layers[-1]
+
     def HigherOrderAttention(self, hparams, queries, keys, values, bases,
                                 layer_idx=1, has_residual=True, do_projection=None):
         # Linear projections
@@ -146,10 +176,10 @@ class DeepAttentionalCrossingModel(BaseModel):
         weights = tf.matmul(Q_, tf.transpose(K_, [0, 2, 1]))
         # Scale
         weights = weights / (K_.get_shape().as_list()[-1] ** 0.5)
-        # Activation
-        weights = tf.nn.softmax(weights)
         if (layer_idx == 0):
             self.weights = weights
+        # Activation
+        weights = tf.nn.softmax(weights)
         # Weighted sum with higher order
         V_expand = tf.reshape(tf.tile(V_, [1, field_num, 1]), [-1, field_num, field_num, int(num_units/num_heads)])
         BV_sec_ord = tf.multiply(V_expand, tf.expand_dims(B_, 2))   # [-1, field_num, field_num, dim]

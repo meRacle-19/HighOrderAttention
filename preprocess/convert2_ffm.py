@@ -16,7 +16,7 @@ def sample(input_path, train_path, eval_path, test_path, gen_file=True, debug=No
     source = pd.read_csv(input_path, nrows=debug, header=None, names=cols, sep='\t')
     source = source.sample(frac=1.0)  # 全部打乱
     cut_idx1 = int(round(0.1 * source.shape[0]))
-    cut_idx2 = int(round(0.2 * source.shape[0]))
+    cut_idx2 = int(round(0.1 * source.shape[0]))
 
     df_test, df_eval, df_train = source.iloc[:cut_idx1], source.iloc[cut_idx1:cut_idx2], source.iloc[cut_idx2:]
     if gen_file:
@@ -143,12 +143,12 @@ if __name__ == '__main__':
     train_file = "../cache/train.csv"
     eval_file = "../cache/eval.csv"
     test_file = "../cache/test.csv"
-    out_dir = "../data/sample_50w"
+    out_dir = "../data/sample_1000w"
     fieldList = ['Label', 'I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 'I11', 'I12', 'I13', 'C1',
                  'C2', 'C3',
                  'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12', 'C13', 'C14', 'C15', 'C16', 'C17', 'C18',
                  'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26']
-    sample(input_path, train_file, eval_file, test_file, cols=fieldList, debug=500000)
+    sample(input_path, train_file, eval_file, test_file, cols=fieldList, debug=10000000)
     print('sample done.')
 
     # 统计category feat词频
@@ -156,7 +156,7 @@ if __name__ == '__main__':
     scan(train_file, feat_cnt)
     scan(eval_file, feat_cnt)
     scan(test_file, feat_cnt)
-    T = 5 # category feat长尾阈值
+    T = 1 # category feat长尾阈值
     featSet = set()
     # continuous feat离散化  category feat去长尾
     get_feat(featSet, train_file, T)

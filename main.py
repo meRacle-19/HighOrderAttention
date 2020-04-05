@@ -79,6 +79,7 @@ def create_hparams(FLAGS):
         # show info
         log=FLAGS['log'] if 'log' in FLAGS else "log",
         logger=None,
+        eval_step=FLAGS['eval_step'] if 'eval_step' in FLAGS else 1,
         show_step=FLAGS['show_step'] if 'show_step' in FLAGS else 1,
         save_epoch=FLAGS['save_epoch'] if 'save_epoch' in FLAGS else 5,
         metrics=FLAGS['metrics'] if 'metrics' in FLAGS else None
@@ -123,26 +124,14 @@ def check_type(config):
 
 def check_nn_config(config):
     """check neural networks config"""
-    if config['model']['model_type'] in ['fm']:
+    if config['model']['model_type'] in ['FM']:
         required_parameters = ['train_file', 'eval_file', 'FEATURE_COUNT', 'dim', 'loss', 'data_format', 'method']
-    elif config['model']['model_type'] in ['lr']:
+    elif config['model']['model_type'] in ['LR']:
         required_parameters = ['train_file', 'eval_file', 'FEATURE_COUNT', 'loss', 'data_format', 'method']
-    elif config['model']['model_type'] in ['din']:
-        required_parameters = ['train_file', 'eval_file', 'PAIR_NUM', 'DNN_FIELD_NUM', 'FEATURE_COUNT', 'dim', \
-                               'layer_sizes', 'activation', 'attention_layer_sizes', 'attention_activation', 'loss', \
-                               'data_format', 'dropout', 'method']
-    elif config['model']['model_type'] in ['cccfnet']:
-        required_parameters = ['train_file', 'eval_file', 'dim', 'layer_sizes', 'n_user', 'n_item', 'n_user_attr',
-                               'n_item_attr',
-                               'activation', 'loss', 'data_format', 'dropout', 'mu', 'method']
-    elif config['model']['model_type'] in ['exDeepFM']:
+    elif config['model']['model_type'] in ['exDeepFM', 'CIN']:
         required_parameters = ['train_file', 'eval_file', 'FIELD_COUNT', 'FEATURE_COUNT', 'method',
                                'dim', 'layer_sizes', 'cross_layer_sizes', 'activation', 'loss', 'data_format', 'dropout']
-    elif config['model']['model_type'] in ['deepcross']:
-        required_parameters = ['train_file', 'eval_file', 'FIELD_COUNT', 'FEATURE_COUNT', 'method',
-                               'dim', 'layer_sizes', 'cross_layers', 'activation', 'loss', 'data_format',
-                               'dropout']
-    elif config['model']['model_type'] in ['HOA']:
+    elif config['model']['model_type'] in ['DACN', 'HOA']:
         required_parameters = ['train_file', 'eval_file', 'FIELD_COUNT', 'FEATURE_COUNT', 'method', 'embedding_dim',
                                'orders', 'cross_layer_heads', 'layer_sizes',
                                'layer_activations', 'dropout']
@@ -170,13 +159,11 @@ def check_nn_config(config):
 
 def check_config(config):
     """check networks config"""
-    if config['model']['model_type'] not in ['deepFM', 'deepWide', 'dnn', 'ipnn', \
-                                             'opnn', 'fm', 'lr', 'din', 'cccfnet', \
-                                             'deepcross', 'exDeepFM', "cross", "CIN", \
-                                             'HOA']:
+    if config['model']['model_type'] not in ['LR', 'FM', 'cross', 'CIN', 'HOA',
+                                             'DNN', 'deepWide', 'deepCross', 'exDeepFM', 'DACN']:
         raise ValueError(
-            "model type must be cccfnet, deepFM, deepWide, dnn, ipnn, opnn, fm, lr, \
-             din, deepcross, exDeepFM, cross, CIN but you set is {0}".format(config['model']['model_type']))
+            "model type must be LR, FM, cross, CIN, HOA, \
+            DNN, deepWide, deepCross, exDeepFM, DACN,but you set is {0}".format(config['model']['model_type']))
     check_nn_config(config)
 
 

@@ -202,37 +202,6 @@ class BaseModel(object):
         else:
             raise ValueError("this activations not defined {0}".format(activation))
 
-    def _dnn(self, input_embed, layer_sizes=[], activations=[], name=None):
-        last_layer_size = input_embed.get_shape().as_list()[-1]
-        hidden_nn_layers = [input_embed]
-        with tf.variable_scope(name, initializer=self.initializer) as scope:
-            for idx, layer_size in enumerate(layer_sizes):
-                w_name = 'w_layer_{}'.format(idx)
-                b_name = 'b_layer_{}'.format(idx)
-                curr_w_nn_layer = tf.get_variable(name=w_name,
-                                                  shape=[last_layer_size, layer_size],
-                                                  dtype=tf.float32,
-                                                  initializer=tf.truncated_normal_initializer(0, 1/(last_layer_size+layer_size)))
-                curr_b_nn_layer = tf.get_variable(name=b_name,
-                                                  shape=[layer_size],
-                                                  dtype=tf.float32,
-                                                  initializer=tf.zeros_initializer())
-                self.layer_params.append(curr_w_nn_layer)
-                self.layer_params.append(curr_b_nn_layer)
-                tf.summary.histogram(w_name, curr_w_nn_layer)
-                tf.summary.histogram(b_name, curr_b_nn_layer)
-                curr_hidden_nn_layer = tf.nn.xw_plus_b(hidden_nn_layers[idx],
-                                                       curr_w_nn_layer,
-                                                       curr_b_nn_layer)
-
-                activation = activations[idx]
-                curr_hidden_nn_layer = self._active_layer(logit=curr_hidden_nn_layer,
-                                                          activation=activation)
-                hidden_nn_layers.append(curr_hidden_nn_layer)
-                last_layer_size = layer_size
-            return hidden_nn_layers[-1]
-
-
     def _dropout(self, logit, idx=0):
         logit = tf.nn.dropout(x=logit, keep_prob=self.layer_keeps[idx])
         return logit

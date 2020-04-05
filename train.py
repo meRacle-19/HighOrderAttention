@@ -72,7 +72,6 @@ def run_eval(load_model, load_sess, filename, sample_num_file, hparams, flag):
     res = metric.cal_metric(labels, preds, hparams, flag)
     return res
 
-
 # run infer
 def run_infer(load_model, load_sess, filename, hparams, sample_num_file):
     # load sample num
@@ -261,6 +260,14 @@ def train(hparams, scope=None, target_session=""):
                  for item in sorted(test_res.items(), key=lambda x: x[0])])
         test_end = time.time()
         test_time = test_end - test_start
+        if hparams.model_type in ['HOA']:
+            train_sess.run(train_model.iterator.initializer, feed_dict={train_model.filenames: [hparams.test_file_cache]})
+            HOA_weights = train_sess.run(train_model.model.weights, feed_dict={train_model.model.layer_keeps: [1.0]})
+            weights_file = open('./logs/weights', 'w+')
+            for row in HOA_weights[0]:
+                for item in row:
+                    weights_file.write(str(item) + ',')
+                weights_file.write('\n')
         if hparams.test_file is not None:
             print('at epoch {0:d}'.format(
                 epoch) + ' train info: ' + train_info + ' test info: ' + test_info)

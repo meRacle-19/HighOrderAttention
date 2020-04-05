@@ -19,7 +19,6 @@ class HigherOrderAttentionModel(DeepAttentionalCrossingModel):
                                                  dtype=tf.float32)
                 self.embed_params.append(self.embedding)
                 self.embed_out, embed_layer_size = self._build_embedding(hparams)
-            logit = []
-            logit.append(self._build_HOA(hparams, self.embed_out, reduce='sum_pooling', do_projection=True, has_residual=True))
+            logit = self._build_HOA(hparams, self.embed_out, reduce='sum_pooling', do_projection=True, has_residual=True)
 
-            return self._dnn(tf.concat(logit,axis=1), [1], ['identity'], name="combination")
+            return logit

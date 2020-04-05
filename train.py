@@ -200,6 +200,7 @@ def train(hparams, scope=None, target_session=""):
     print('total_loss = data_loss+regularization_loss, data_loss = {rmse or logloss ..}')
     writer = tf.summary.FileWriter(util.SUMMARIES_DIR, train_sess.graph)
     last_eval = 0
+    catch = False # catch instance to analyze weights
     for epoch in range(hparams.epochs):
         step = 0
         train_sess.run(train_model.iterator.initializer, feed_dict={train_model.filenames: [hparams.train_file_cache]})
@@ -260,14 +261,17 @@ def train(hparams, scope=None, target_session=""):
                  for item in sorted(test_res.items(), key=lambda x: x[0])])
         test_end = time.time()
         test_time = test_end - test_start
-        if hparams.model_type in ['HOA']:
+        if hparams.model_type in ['HOA'] and not catch:
             train_sess.run(train_model.iterator.initializer, feed_dict={train_model.filenames: [hparams.test_file_cache]})
             HOA_weights = train_sess.run(train_model.model.weights, feed_dict={train_model.model.layer_keeps: [1.0]})
             weights_file = open('./logs/weights', 'w+')
-            for row in HOA_weights[0]:
-                for item in row:
-                    weights_file.write(str(item) + ',')
+            for instance in HOA_weights:
+                for row in instance:
+                    for item in row:
+                        weights_file.write(str(item) + ',')
+                    weights_file.write('\n')
                 weights_file.write('\n')
+            catch = True
         if hparams.test_file is not None:
             print('at epoch {0:d}'.format(
                 epoch) + ' train info: ' + train_info + ' test info: ' + test_info)
